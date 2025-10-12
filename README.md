@@ -1,1 +1,99 @@
-# aauserrainy.github.io
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Come Fly Somewhere Far With Us</title>
+  <style>
+    html,body{height:100%;margin:0}
+    body{font-family:'Orbitron',sans-serif;background:#000;overflow:hidden;color:#fff}
+
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+
+    #bgCanvas{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+
+    .hero{
+      position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:3rem;text-align:center;flex-direction:column;gap:1.5rem;
+    }
+
+    .headline{
+      color:rgba(255,255,255,0.6);
+      font-weight:900;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+      line-height:1.1;
+      font-size:clamp(30px,6vw,60px);
+      text-shadow:0 0 20px rgba(255,255,255,0.5), 0 0 50px rgba(255,255,255,0.2);
+    }
+
+    .fly-button{
+      color:rgba(255,255,255,0.6);
+      font-weight:900;
+      background:transparent;
+      border:2px solid rgba(255,255,255,0.6);
+      border-radius:12px;
+      padding:0.8rem 2rem;
+      font-size:clamp(16px,3vw,24px);
+      cursor:pointer;
+      transition:all 0.4s ease;
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      box-shadow:0 0 15px rgba(255,255,255,0.25);
+    }
+
+    .fly-button:hover{
+      color:#ffffff;
+      border-color:#ffffff;
+      box-shadow:0 0 30px rgba(255,255,255,0.6);
+      transform:scale(1.08);
+    }
+
+    @media (max-width:520px){
+      .headline{font-size:clamp(22px,8vw,36px)}
+      .fly-button{font-size:clamp(14px,5vw,18px)}
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<section class="hero" role="main">
+  <div class="headline">come fly somewhere far with us</div>
+  <!-- Download Button -->
+  <a href="flywithme.exe" download>
+    <button class="fly-button">do you want to fly?</button>
+  </a>
+</section>
+
+<!-- Background Music -->
+<audio id="bgMusic" autoplay loop>
+  <source src="bitcoin.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+
+<script>
+// Adjust background music volume
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0.3;
+
+// Particle Background Script
+const canvas=document.getElementById('bgCanvas');
+const ctx=canvas.getContext('2d');
+let w=canvas.width=innerWidth,h=canvas.height=innerHeight;let particles=[];
+const COUNT=Math.round(Math.max(60,Math.min(200,(w*h)/80000)));
+function rand(min,max){return Math.random()*(max-min)+min}
+class Particle{
+ constructor(){this.reset();}
+ reset(){this.x=rand(0,w);this.y=rand(0,h);this.vx=rand(-0.25,0.25);this.vy=rand(-0.25,0.25);this.size=rand(0.8,2.8);this.alpha=rand(0.3,1);this.life=rand(200,600);this.age=0;this.base=rand(0,Math.PI*2);} 
+ update(){this.x+=this.vx+Math.sin(this.base+this.age*0.002)*0.15;this.y+=this.vy+Math.cos(this.base+this.age*0.002)*0.15;this.age++;if(this.age>this.life||this.x<-50||this.x>w+50||this.y<-50||this.y>h+50)this.reset();}
+ draw(){ctx.beginPath();ctx.globalAlpha=this.alpha;ctx.fillStyle='#ffffff';ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();}
+}
+function init(){particles=[];for(let i=0;i<COUNT;i++)particles.push(new Particle());}
+function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight;init();}
+window.addEventListener('resize',resize);
+function drawBg(){ctx.fillStyle='rgba(0,0,0,1)';ctx.fillRect(0,0,w,h);}
+function drawConnections(){for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const a=particles[i],b=particles[j];const dx=a.x-b.x,dy=a.y-b.y;const d=Math.sqrt(dx*dx+dy*dy);if(d<250){ctx.strokeStyle='rgba(255,255,255,'+(0.12*(1-d/250))+')';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}}
+function step(){drawBg();for(const p of particles){p.update();p.draw();}drawConnections();requestAnimationFrame(step);}init();step();
+</script>
+</body>
+</html>
