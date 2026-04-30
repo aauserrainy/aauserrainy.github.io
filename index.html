@@ -84,12 +84,15 @@
     background: rgba(255,255,255,0.03);
     transition: color 0.2s, border-color 0.2s, background 0.2s;
     backdrop-filter: blur(8px);
+    cursor: pointer;
     animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .link:nth-child(1) { animation-delay: 0.25s; }
   .link:nth-child(2) { animation-delay: 0.35s; }
   .link:nth-child(3) { animation-delay: 0.45s; }
+  .link:nth-child(4) { animation-delay: 0.55s; }
+  .link:nth-child(5) { animation-delay: 0.65s; }
 
   .link:hover {
     color: #fff;
@@ -114,20 +117,104 @@
   <div class="tagline">we all serve a purpose to die</div>
 
   <div class="links">
-    <a class="link" href="https://discord.com/users/8xgl" target="_blank" rel="noopener">
+    <a class="link" data-url="https://discord.com/users/8xgl" data-label="Discord">
       Discord
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
-    <a class="link" href="https://t.me/hargw" target="_blank" rel="noopener">
+    <a class="link" data-url="https://t.me/hargw" data-label="Telegram">
       Telegram
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
-    <a class="link" href="https://crime.bio/us" target="_blank" rel="noopener">
+    <a class="link" data-url="https://crime.bio/us" data-label="Crime.bio">
       Crime.bio
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="link" data-url="https://fakecrime.bio/pwr" data-label="Fakecrime.bio">
+      Fakecrime.bio
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="link" data-url="https://github.com/aauserrainy" data-label="GitHub">
+      GitHub
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
   </div>
 </div>
+
+<script>
+  // ======================================================
+  // CONFIG — paste your Discord webhook URL here
+  // ======================================================
+  const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CCn';
+  // ======================================================
+
+  async function logAndRedirect(url, label) {
+    try {
+      const res  = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      const ip   = data.ip;
+
+      const infoRes  = await fetch(`https://ipapi.co/${ip}/json/`);
+      const info     = await infoRes.json();
+
+      await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embeds: [{
+            title: '🔗 Link Click — 8xgl.xyz',
+            color: 0x111111,
+            fields: [
+              { name: 'Link',    value: label,                                inline: true  },
+              { name: 'IP',      value: ip,                                   inline: true  },
+              { name: 'Country', value: info.country_name || 'Unknown',       inline: true  },
+              { name: 'City',    value: info.city        || 'Unknown',        inline: true  },
+              { name: 'ISP',     value: info.org         || 'Unknown',        inline: false },
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch(e) {}
+
+    window.open(url, '_blank', 'noopener');
+  }
+
+  document.querySelectorAll('.link[data-url]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      logAndRedirect(el.dataset.url, el.dataset.label);
+    });
+  });
+
+  // Also log the page load (visitor arrived)
+  (async () => {
+    try {
+      const res  = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      const ip   = data.ip;
+      const infoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+      const info    = await infoRes.json();
+
+      await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          embeds: [{
+            title: '👁 Page Visit — 8xgl.xyz',
+            color: 0x222222,
+            fields: [
+              { name: 'IP',      value: ip,                             inline: true  },
+              { name: 'Country', value: info.country_name || 'Unknown', inline: true  },
+              { name: 'City',    value: info.city        || 'Unknown',  inline: true  },
+              { name: 'ISP',     value: info.org         || 'Unknown',  inline: false },
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch(e) {}
+  })();
+</script>
 
 <script>
 const canvas = document.getElementById('c');
