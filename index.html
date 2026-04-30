@@ -1,99 +1,198 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Do you want to fly?</title>
-  <style>
-    html,body{height:100%;margin:0}
-    body{font-family:'Orbitron',sans-serif;background:#000;overflow:hidden;color:#fff}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8xgl</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+  body {
+    background: #060608;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    #bgCanvas{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
 
-    .hero{
-      position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:3rem;text-align:center;flex-direction:column;gap:1.5rem;
-    }
+  .container {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 
-    .headline{
-      color:rgba(255,255,255,0.6);
-      font-weight:900;
-      letter-spacing:0.1em;
-      text-transform:uppercase;
-      line-height:1.1;
-      font-size:clamp(30px,6vw,60px);
-      text-shadow:0 0 20px rgba(255,255,255,0.5), 0 0 50px rgba(255,255,255,0.2);
-    }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-    .fly-button{
-      color:rgba(255,255,255,0.6);
-      font-weight:900;
-      background:transparent;
-      border:2px solid rgba(255,255,255,0.6);
-      border-radius:12px;
-      padding:0.8rem 2rem;
-      font-size:clamp(16px,3vw,24px);
-      cursor:pointer;
-      transition:all 0.4s ease;
-      text-transform:uppercase;
-      letter-spacing:0.05em;
-      box-shadow:0 0 15px rgba(255,255,255,0.25);
-    }
+  .name {
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 6px;
+  }
 
-    .fly-button:hover{
-      color:#ffffff;
-      border-color:#ffffff;
-      box-shadow:0 0 30px rgba(255,255,255,0.6);
-      transform:scale(1.08);
-    }
+  .tagline {
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    margin-bottom: 52px;
+    animation: fadeUp 1.2s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 
-    @media (max-width:520px){
-      .headline{font-size:clamp(22px,8vw,36px)}
-      .fly-button{font-size:clamp(14px,5vw,18px)}
-    }
-  </style>
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 220px;
+  }
+
+  .link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 13px 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    background: rgba(255,255,255,0.03);
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    backdrop-filter: blur(8px);
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .link:nth-child(1) { animation-delay: 0.25s; }
+  .link:nth-child(2) { animation-delay: 0.35s; }
+  .link:nth-child(3) { animation-delay: 0.45s; }
+
+  .link:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .link svg {
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+
+  .link:hover svg { opacity: 1; }
+</style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
-<section class="hero" role="main">
-  <div class="headline">come fly somewhere far with us</div>
-  <!-- Download Button -->
-  <a href="flywithme.exe" download>
-    <button class="fly-button">do you want to fly?</button>
-  </a>
-</section>
+<canvas id="c"></canvas>
 
-<!-- Background Music -->
-<audio id="bgMusic" autoplay loop>
-  <source src="bitcoin.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+<div class="container">
+  <div class="name">8xgl</div>
+  <div class="tagline">we all serve a purpose to die</div>
+
+  <div class="links">
+    <a class="link" href="https://discord.com/users/8xgl" target="_blank" rel="noopener">
+      Discord
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="link" href="https://t.me/hargw" target="_blank" rel="noopener">
+      Telegram
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="link" href="https://crime.bio/us" target="_blank" rel="noopener">
+      Crime.bio
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</div>
 
 <script>
-// Adjust background music volume
-const bgMusic = document.getElementById('bgMusic');
-bgMusic.volume = 0.3;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
 
-// Particle Background Script
-const canvas=document.getElementById('bgCanvas');
-const ctx=canvas.getContext('2d');
-let w=canvas.width=innerWidth,h=canvas.height=innerHeight;let particles=[];
-const COUNT=Math.round(Math.max(60,Math.min(200,(w*h)/80000)));
-function rand(min,max){return Math.random()*(max-min)+min}
-class Particle{
- constructor(){this.reset();}
- reset(){this.x=rand(0,w);this.y=rand(0,h);this.vx=rand(-0.25,0.25);this.vy=rand(-0.25,0.25);this.size=rand(0.8,2.8);this.alpha=rand(0.3,1);this.life=rand(200,600);this.age=0;this.base=rand(0,Math.PI*2);} 
- update(){this.x+=this.vx+Math.sin(this.base+this.age*0.002)*0.15;this.y+=this.vy+Math.cos(this.base+this.age*0.002)*0.15;this.age++;if(this.age>this.life||this.x<-50||this.x>w+50||this.y<-50||this.y>h+50)this.reset();}
- draw(){ctx.beginPath();ctx.globalAlpha=this.alpha;ctx.fillStyle='#ffffff';ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();}
+let W, H, dots;
+
+const DOTS = 88;
+const MAX_DIST = 145;
+const DOT_COLOR = 'rgba(255,255,255,';
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
 }
-function init(){particles=[];for(let i=0;i<COUNT;i++)particles.push(new Particle());}
-function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight;init();}
-window.addEventListener('resize',resize);
-function drawBg(){ctx.fillStyle='rgba(0,0,0,1)';ctx.fillRect(0,0,w,h);}
-function drawConnections(){for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const a=particles[i],b=particles[j];const dx=a.x-b.x,dy=a.y-b.y;const d=Math.sqrt(dx*dx+dy*dy);if(d<250){ctx.strokeStyle='rgba(255,255,255,'+(0.12*(1-d/250))+')';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}}
-function step(){drawBg();for(const p of particles){p.update();p.draw();}drawConnections();requestAnimationFrame(step);}init();step();
+
+function initDots() {
+  dots = Array.from({ length: DOTS }, () => ({
+    x:  Math.random() * W,
+    y:  Math.random() * H,
+    vx: (Math.random() - 0.5) * 0.45,
+    vy: (Math.random() - 0.5) * 0.45,
+    r:  Math.random() * 1.5 + 1
+  }));
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  for (let i = 0; i < dots.length; i++) {
+    const d = dots[i];
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.x < 0 || d.x > W) d.vx *= -1;
+    if (d.y < 0 || d.y > H) d.vy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fillStyle = DOT_COLOR + '0.55)';
+    ctx.fill();
+
+    for (let j = i + 1; j < dots.length; j++) {
+      const b = dots[j];
+      const dx = d.x - b.x;
+      const dy = d.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < MAX_DIST) {
+        const alpha = (1 - dist / MAX_DIST) * 0.18;
+        ctx.beginPath();
+        ctx.moveTo(d.x, d.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = DOT_COLOR + alpha + ')';
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', () => { resize(); initDots(); });
+resize();
+initDots();
+draw();
 </script>
 </body>
 </html>
