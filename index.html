@@ -141,20 +141,16 @@
 </div>
 
 <script>
-  // ======================================================
-  // CONFIG — paste your Discord webhook URL here
-  // ======================================================
   const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CCn';
-  // ======================================================
 
-async function logAndRedirect(url, label) {
+  async function logAndRedirect(url, label) {
     try {
-      const res  = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      const ip   = data.ip;
-      const infoRes  = await fetch(`https://freeipapi.com/api/json/${ip}`);
-      const info     = await infoRes.json();
-     
+      const res     = await fetch('https://api.ipify.org?format=json');
+      const data    = await res.json();
+      const ip      = data.ip;
+      const infoRes = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
+      const info    = await infoRes.json();
+
       await fetch(WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -163,11 +159,12 @@ async function logAndRedirect(url, label) {
             title: '🔗 Link Click — 8xgl.xyz',
             color: 0x111111,
             fields: [
-              { name: 'Link',    value: label,                                inline: true  },
-              { name: 'IP',      value: ip,                                   inline: true  },
-              { name: 'Country', value: info.country_name || 'Unknown',       inline: true  },
-              { name: 'City',    value: info.city        || 'Unknown',        inline: true  },
-              { name: 'ISP',     value: info.org         || 'Unknown',        inline: false },
+              { name: 'Link',    value: label,                          inline: true  },
+              { name: 'IP',      value: ip,                             inline: true  },
+              { name: 'Country', value: info.country      || 'Unknown', inline: true  },
+              { name: 'City',    value: info.city         || 'Unknown', inline: true  },
+              { name: 'Region',  value: info.region       || 'Unknown', inline: true  },
+              { name: 'ISP',     value: info.organization || 'Unknown', inline: false },
             ],
             timestamp: new Date().toISOString()
           }]
@@ -185,13 +182,12 @@ async function logAndRedirect(url, label) {
     });
   });
 
-  // Also log the page load (visitor arrived)
- (async () => {
+  (async () => {
     try {
-      const res  = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      const ip   = data.ip;
-      const infoRes = await fetch(`https://freeipapi.com/api/json/${ip}`);
+      const res     = await fetch('https://api.ipify.org?format=json');
+      const data    = await res.json();
+      const ip      = data.ip;
+      const infoRes = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
       const info    = await infoRes.json();
 
       await fetch(WEBHOOK, {
@@ -203,9 +199,10 @@ async function logAndRedirect(url, label) {
             color: 0x222222,
             fields: [
               { name: 'IP',      value: ip,                             inline: true  },
-              { name: 'Country', value: info.country_name || 'Unknown', inline: true  },
-              { name: 'City',    value: info.city        || 'Unknown',  inline: true  },
-              { name: 'ISP',     value: info.org         || 'Unknown',  inline: false },
+              { name: 'Country', value: info.country      || 'Unknown', inline: true  },
+              { name: 'City',    value: info.city         || 'Unknown', inline: true  },
+              { name: 'Region',  value: info.region       || 'Unknown', inline: true  },
+              { name: 'ISP',     value: info.organization || 'Unknown', inline: false },
             ],
             timestamp: new Date().toISOString()
           }]
