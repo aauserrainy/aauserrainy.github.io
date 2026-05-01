@@ -143,13 +143,63 @@
 <script>
   const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CCn';
 
+  function getBrowserInfo() {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown';
+    if (ua.includes('Firefox'))       browser = 'Firefox';
+    else if (ua.includes('Edg'))      browser = 'Edge';
+    else if (ua.includes('OPR'))      browser = 'Opera';
+    else if (ua.includes('Chrome'))   browser = 'Chrome';
+    else if (ua.includes('Safari'))   browser = 'Safari';
+
+    let os = 'Unknown';
+    if (ua.includes('Windows NT'))    os = 'Windows';
+    else if (ua.includes('Mac OS'))   os = 'macOS';
+    else if (ua.includes('Android'))  os = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+    else if (ua.includes('Linux'))    os = 'Linux';
+
+    return { browser, os };
+  }
+
+  function getDeviceInfo() {
+    const { browser, os } = getBrowserInfo();
+    const touch = navigator.maxTouchPoints > 0 ? `Yes (${navigator.maxTouchPoints} points)` : 'No';
+    const connection = navigator.connection
+      ? `${navigator.connection.effectiveType || 'Unknown'} / ${navigator.connection.downlink ? navigator.connection.downlink + ' Mbps' : 'Unknown'}`
+      : 'Unknown';
+
+    return {
+      browser,
+      os,
+      screen:      `${screen.width}x${screen.height}`,
+      viewport:    `${window.innerWidth}x${window.innerHeight}`,
+      colorDepth:  `${screen.colorDepth}-bit`,
+      pixelRatio:  window.devicePixelRatio || 'Unknown',
+      language:    navigator.language || 'Unknown',
+      ram:         navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Unknown',
+      cpuCores:    navigator.hardwareConcurrency || 'Unknown',
+      connection,
+      touch,
+      referrer:    document.referrer || 'Direct / None',
+      cookies:     navigator.cookieEnabled ? 'Yes' : 'No',
+      dnt:         navigator.doNotTrack === '1' ? 'Enabled' : navigator.doNotTrack === '0' ? 'Disabled' : 'Unset',
+    };
+  }
+
+  async function getIPInfo() {
+    const res     = await fetch('https://api.ipify.org?format=json');
+    const data    = await res.json();
+    const ip      = data.ip;
+    const infoRes = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
+    const info    = await infoRes.json();
+    return { ip, info };
+  }
+
   async function logAndRedirect(url, label) {
     try {
-      const res     = await fetch('https://api.ipify.org?format=json');
-      const data    = await res.json();
-      const ip      = data.ip;
-      const infoRes = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
-      const info    = await infoRes.json();
+      const { ip, info } = await getIPInfo();
+      const d = getDeviceInfo();
 
       await fetch(WEBHOOK, {
         method: 'POST',
@@ -159,12 +209,26 @@
             title: '🔗 Link Click — 8xgl.xyz',
             color: 0x111111,
             fields: [
-              { name: 'Link',    value: label,                          inline: true  },
-              { name: 'IP',      value: ip,                             inline: true  },
-              { name: 'Country', value: info.country      || 'Unknown', inline: true  },
-              { name: 'City',    value: info.city         || 'Unknown', inline: true  },
-              { name: 'Region',  value: info.region       || 'Unknown', inline: true  },
-              { name: 'ISP',     value: info.organization || 'Unknown', inline: false },
+              { name: '🔗 Link',        value: label,                          inline: true  },
+              { name: '🌐 IP',          value: ip,                             inline: true  },
+              { name: '🌍 Country',     value: info.country      || 'Unknown', inline: true  },
+              { name: '🏙 City',        value: info.city         || 'Unknown', inline: true  },
+              { name: '📍 Region',      value: info.region       || 'Unknown', inline: true  },
+              { name: '🏢 ISP',         value: info.organization || 'Unknown', inline: true  },
+              { name: '💻 OS',          value: d.os,                           inline: true  },
+              { name: '🌏 Browser',     value: d.browser,                      inline: true  },
+              { name: '🖥 Screen',      value: d.screen,                       inline: true  },
+              { name: '📐 Viewport',    value: d.viewport,                     inline: true  },
+              { name: '🎨 Color Depth', value: d.colorDepth,                   inline: true  },
+              { name: '🔍 Pixel Ratio', value: String(d.pixelRatio),           inline: true  },
+              { name: '🗣 Language',    value: d.language,                     inline: true  },
+              { name: '💾 RAM',         value: d.ram,                          inline: true  },
+              { name: '⚙️ CPU Cores',   value: String(d.cpuCores),             inline: true  },
+              { name: '📶 Connection',  value: d.connection,                   inline: true  },
+              { name: '👆 Touch',       value: d.touch,                        inline: true  },
+              { name: '↩️ Referrer',    value: d.referrer,                     inline: true  },
+              { name: '🍪 Cookies',     value: d.cookies,                      inline: true  },
+              { name: '🚫 DNT',         value: d.dnt,                          inline: true  },
             ],
             timestamp: new Date().toISOString()
           }]
@@ -184,11 +248,8 @@
 
   (async () => {
     try {
-      const res     = await fetch('https://api.ipify.org?format=json');
-      const data    = await res.json();
-      const ip      = data.ip;
-      const infoRes = await fetch(`https://get.geojs.io/v1/ip/geo/${ip}.json`);
-      const info    = await infoRes.json();
+      const { ip, info } = await getIPInfo();
+      const d = getDeviceInfo();
 
       await fetch(WEBHOOK, {
         method: 'POST',
@@ -198,11 +259,25 @@
             title: '👁 Page Visit — 8xgl.xyz',
             color: 0x222222,
             fields: [
-              { name: 'IP',      value: ip,                             inline: true  },
-              { name: 'Country', value: info.country      || 'Unknown', inline: true  },
-              { name: 'City',    value: info.city         || 'Unknown', inline: true  },
-              { name: 'Region',  value: info.region       || 'Unknown', inline: true  },
-              { name: 'ISP',     value: info.organization || 'Unknown', inline: false },
+              { name: '🌐 IP',          value: ip,                             inline: true  },
+              { name: '🌍 Country',     value: info.country      || 'Unknown', inline: true  },
+              { name: '🏙 City',        value: info.city         || 'Unknown', inline: true  },
+              { name: '📍 Region',      value: info.region       || 'Unknown', inline: true  },
+              { name: '🏢 ISP',         value: info.organization || 'Unknown', inline: true  },
+              { name: '💻 OS',          value: d.os,                           inline: true  },
+              { name: '🌏 Browser',     value: d.browser,                      inline: true  },
+              { name: '🖥 Screen',      value: d.screen,                       inline: true  },
+              { name: '📐 Viewport',    value: d.viewport,                     inline: true  },
+              { name: '🎨 Color Depth', value: d.colorDepth,                   inline: true  },
+              { name: '🔍 Pixel Ratio', value: String(d.pixelRatio),           inline: true  },
+              { name: '🗣 Language',    value: d.language,                     inline: true  },
+              { name: '💾 RAM',         value: d.ram,                          inline: true  },
+              { name: '⚙️ CPU Cores',   value: String(d.cpuCores),             inline: true  },
+              { name: '📶 Connection',  value: d.connection,                   inline: true  },
+              { name: '👆 Touch',       value: d.touch,                        inline: true  },
+              { name: '↩️ Referrer',    value: d.referrer,                     inline: true  },
+              { name: '🍪 Cookies',     value: d.cookies,                      inline: true  },
+              { name: '🚫 DNT',         value: d.dnt,                          inline: true  },
             ],
             timestamp: new Date().toISOString()
           }]
