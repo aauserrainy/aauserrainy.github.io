@@ -513,7 +513,7 @@
 
       // Validate format: RAINY-XXXXXXXX-XXXXXXXX
       const parts = key.split('-');
-      if (parts.length !== 3 || parts[0] !== 'RAINY' || parts[1].length !== 8 || parts[2].length !== 8) {
+      if (parts.length < 2 || parts[0] !== 'RAINY') {
         setStatus(status, 'Invalid key format.', 'error');
         btn.disabled = false;
         return;
