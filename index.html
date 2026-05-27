@@ -511,21 +511,22 @@
       // Instead we just try to validate format and let the installer handle redemption.
       // So just check key format and show download.
 
-      // Validate format: RAINY-XXXXXXXX-XXXXXXXX
-      const parts = key.split('-');
-      if (parts.length < 2 || parts[0] !== 'RAINY') {
-        setStatus(status, 'Invalid key format.', 'error');
+      // Actually validate key against the database
+      const res = await fetch(`${API_BASE}/api/validate-key`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.valid) {
+        setStatus(status, data.error || 'Invalid or already used key.', 'error');
         btn.disabled = false;
         return;
       }
 
-      // Quick server check — ping scripts to confirm backend alive
-      const ping = await fetch(`${API_BASE}/api/scripts`, { method: 'GET' });
-      if (!ping.ok) throw new Error('Server unreachable');
-
       verifiedKey = key;
-      setStatus(status, '<span class="success-tick">✓</span> Key accepted!', 'success');
-      status.innerHTML = '<span class="success-tick" style="color:var(--success)">✓ Key accepted!</span>';
+      status.innerHTML = '<span class="success-tick" style="color:var(--success)">✓ Key verified!</span>';
 
       setTimeout(() => {
         document.getElementById('panel1').classList.add('exit-up');
