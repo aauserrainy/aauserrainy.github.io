@@ -342,7 +342,7 @@
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
   // IMPORTANT: Replace this with your Railway backend URL after deploying
- const API_BASE = 'https://rainy-backend1-production.up.railway.app';
+  const API_BASE = 'https://YOUR-RAILWAY-URL.railway.app';
 
   let adminToken = sessionStorage.getItem('adminToken') || '';
   let allKeys = [];
@@ -534,3 +534,81 @@
 </script>
 </body>
 </html>
+<script>
+// ── HWID Panel additions ──────────────────────────────────────────────────────
+// This script patches in HWID management after the page loads
+document.addEventListener('DOMContentLoaded', function() {
+  const orig = window.showDashboard;
+  window.showDashboard = function() {
+    orig && orig();
+    loadHWIDs();
+  };
+});
+
+let allHWIDs = [];
+
+async function loadHWIDs() {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/hwids`, {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    allHWIDs = data.hwids || [];
+    renderHWIDPanel();
+  } catch {}
+}
+
+function renderHWIDPanel() {
+  // Remove old panel if exists
+  const old = document.getElementById('hwidPanel');
+  if (old) old.remove();
+
+  const main = document.querySelector('.main');
+  if (!main) return;
+
+  const panel = document.createElement('div');
+  panel.id = 'hwidPanel';
+  panel.className = 'panel';
+  panel.style.marginTop = '0';
+
+  panel.innerHTML = `
+    <div class="panel-title">Banned HWIDs</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>HWID</th>
+            <th>Reason</th>
+            <th>Banned At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="hwidsBody">
+          ${allHWIDs.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">No banned HWIDs</td></tr>' :
+            allHWIDs.map(h => `
+              <tr>
+                <td style="font-size:0.72rem;color:var(--muted)">${h.hwid.substring(0,20)}...</td>
+                <td style="font-size:0.78rem">${h.reason || '—'}</td>
+                <td style="font-size:0.75rem;color:var(--muted)">${new Date(h.banned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+                <td><button class="btn sm" style="background:linear-gradient(135deg,#44ffaa,#00cc77);color:#050a0f" onclick="unbanHWID('${h.hwid}')">Unban</button></td>
+              </tr>
+            `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  main.appendChild(panel);
+}
+
+async function unbanHWID(hwid) {
+  if (!confirm('Unban this HWID?')) return;
+  try {
+    await fetch(`${API_BASE}/api/admin/hwids/${hwid}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
+    });
+    await loadHWIDs();
+  } catch {}
+}
+</script>
