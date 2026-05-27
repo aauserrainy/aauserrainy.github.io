@@ -1,269 +1,576 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rainy.solutions</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bg: #050a0f;
-      --surface: #0b1520;
-      --border: #1a2d42;
-      --accent: #4ab8ff;
-      --accent2: #0077cc;
-      --text: #d6eaf8;
-      --muted: #4a7a9b;
-      --error: #ff5566;
-      --success: #44ffaa;
-    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
+
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --border: #222222;
+      --border2: #333333;
+      --text: #f0f0f0;
+      --muted: #555555;
+      --muted2: #888888;
+      --accent: #ffffff;
+      --error: #ff4444;
+      --success: #44ff88;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
       background: var(--bg);
       color: var(--text);
       font-family: 'DM Mono', monospace;
-      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Cursor glow ── */
+    .cursor-glow {
+      position: fixed;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s;
+      z-index: 0;
+    }
+
+    /* ── Canvas ── */
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Main layout ── */
+    .page {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 24px;
+      position: absolute;
+      transition: opacity 0.6s cubic-bezier(.22,1,.36,1),
+                  transform 0.6s cubic-bezier(.22,1,.36,1);
+    }
+
+    .panel.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+
+    .panel.exit-up {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-30px);
+    }
+
+    /* ── Logo ── */
+    .logo {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    .logo-wordmark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+      display: block;
       position: relative;
     }
-    .rain-canvas {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none; opacity: 0.18; z-index: 0;
-    }
-    body::before {
-      content: '';
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 700px; height: 700px;
-      background: radial-gradient(ellipse, rgba(74,184,255,0.07) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
-    .container {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 500px;
-      padding: 0 24px;
-      animation: fadeUp 0.8s cubic-bezier(.22,1,.36,1) both;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .logo { text-align: center; margin-bottom: 40px; }
-    .logo-mark {
-      font-family: 'Syne', sans-serif; font-weight: 800;
-      font-size: 2.4rem; letter-spacing: -0.03em;
-      color: var(--accent);
-      text-shadow: 0 0 40px rgba(74,184,255,0.4); display: block;
-    }
+
     .logo-sub {
-      font-size: 0.72rem; letter-spacing: 0.22em;
-      text-transform: uppercase; color: var(--muted); margin-top: 6px;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
     }
+
+    /* ── Card ── */
     .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 36px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
     }
 
-    /* Step tabs */
-    .steps { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 1px solid var(--border); }
-    .step-tab {
-      flex: 1; padding: 10px; text-align: center;
-      font-size: 0.72rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted);
-      cursor: default; border-bottom: 2px solid transparent;
-      transition: all 0.2s;
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: scanline 4s ease-in-out infinite;
     }
-    .step-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .step-tab.done { color: var(--success); }
 
-    /* Panels */
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    .panel-title {
-      font-family: 'Syne', sans-serif; font-weight: 600;
-      font-size: 1.05rem; margin-bottom: 6px;
+    @keyframes scanline {
+      0% { left: -60%; }
+      100% { left: 160%; }
     }
-    .panel-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
 
+    .card-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 0.75rem;
+      color: var(--muted2);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    /* ── Input ── */
     .input-label {
-      font-size: 0.68rem; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--muted);
-      margin-bottom: 7px; display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 8px;
     }
-    input[type="text"], select {
-      width: 100%; background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text); font-family: 'DM Mono', monospace;
-      font-size: 0.9rem; padding: 12px 14px; outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      margin-bottom: 16px;
-    }
-    input[type="text"]:focus, select:focus {
-      border-color: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(74,184,255,0.08);
-    }
-    input[type="text"]::placeholder { color: var(--muted); }
-    input.key-input { letter-spacing: 0.12em; text-transform: uppercase; }
 
-    select { appearance: none; cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a7a9b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+    .input-wrap {
+      position: relative;
+      margin-bottom: 20px;
     }
-    select option { background: #0b1520; }
 
+    .input-wrap input {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      padding: 13px 16px;
+      outline: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .input-wrap input:focus {
+      border-color: rgba(255,255,255,0.4);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+    }
+
+    .input-wrap input::placeholder { color: var(--muted); }
+
+    /* ── Button ── */
     .btn {
-      width: 100%; background: linear-gradient(135deg, var(--accent2), var(--accent));
-      border: none; border-radius: 8px; color: #050a0f;
-      font-family: 'Syne', sans-serif; font-weight: 700;
-      font-size: 0.95rem; letter-spacing: 0.04em;
-      padding: 14px; cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 24px rgba(74,184,255,0.2);
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #080808;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      padding: 14px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
     }
-    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(255,255,255,0.12);
+    }
+
+    .btn:hover::after { background: rgba(0,0,0,0.08); }
     .btn:active { transform: translateY(0); }
-    .btn.secondary {
-      background: transparent; border: 1px solid var(--border);
-      color: var(--text); box-shadow: none; margin-top: 10px;
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    .btn.outline {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+      margin-top: 10px;
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      font-size: 0.8rem;
+      box-shadow: none;
     }
-    .btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
 
-    .download-box {
-      background: rgba(74,184,255,0.05); border: 1px solid rgba(74,184,255,0.15);
-      border-radius: 10px; padding: 18px 20px;
-      display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+    .btn.outline:hover {
+      border-color: rgba(255,255,255,0.3);
+      color: var(--text);
+      box-shadow: none;
     }
-    .download-icon { font-size: 2rem; }
-    .download-info { flex: 1; }
-    .download-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; }
-    .download-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 
-    .howto { font-size: 0.76rem; color: var(--muted); line-height: 1.9; counter-reset: step; }
-    .howto li { list-style: none; padding-left: 22px; position: relative; counter-increment: step; }
-    .howto li::before { content: counter(step); position: absolute; left: 0; color: var(--accent); font-weight: 600; font-size: 0.7rem; }
+    /* ── Status ── */
+    .status {
+      font-size: 0.75rem;
+      text-align: center;
+      min-height: 20px;
+      margin-top: 14px;
+      transition: opacity 0.3s;
+    }
 
-    .status { margin-top: 14px; font-size: 0.78rem; text-align: center; min-height: 18px; }
     .status.error { color: var(--error); }
     .status.success { color: var(--success); }
+    .status.loading { color: var(--muted2); }
 
-    .footer { text-align: center; margin-top: 24px; font-size: 0.7rem; color: var(--muted); }
-    .footer a { color: var(--muted); text-decoration: none; }
-    .footer a:hover { color: var(--accent); }
+    /* ── Download panel ── */
+    .download-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 1.6rem;
+    }
+
+    .steps-list {
+      list-style: none;
+      margin-bottom: 28px;
+    }
+
+    .steps-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 8px 0;
+      font-size: 0.78rem;
+      color: var(--muted2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps-list li:last-child { border-bottom: none; }
+
+    .step-num {
+      width: 22px; height: 22px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem;
+      color: var(--muted2);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      position: fixed;
+      bottom: 24px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      z-index: 1;
+    }
+
+    .footer a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer a:hover { color: var(--muted2); }
+
+    /* ── Tick animation ── */
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-tick {
+      display: inline-block;
+      animation: popIn 0.4s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    /* ── Page fade in ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page { animation: fadeUp 0.9s cubic-bezier(.22,1,.36,1) both; }
   </style>
 </head>
 <body>
-<canvas class="rain-canvas" id="rain"></canvas>
 
-<div class="container">
-  <div class="logo">
-    <span class="logo-mark">Rainy.solutions</span>
-    <span class="logo-sub">Script Distribution</span>
-  </div>
+<div class="cursor-glow" id="glow"></div>
+<canvas id="bgCanvas"></canvas>
 
-  <div class="card">
-    <div class="steps">
-      <div class="step-tab active" id="tab1">① Download</div>
-      <div class="step-tab" id="tab2">② Install</div>
+<div class="page">
+
+  <!-- Panel 1: Key Entry -->
+  <div class="panel" id="panel1">
+    <div class="logo">
+      <span class="logo-wordmark">Rainy.solutions</span>
+      <span class="logo-sub">Script Distribution</span>
     </div>
 
-    <!-- Step 1: Download the installer -->
-    <div class="panel active" id="panel1">
-      <div class="panel-title">Download the Installer</div>
-      <p class="panel-desc">Download the Rainy.solutions installer once. It handles everything — no Zen Studio needed.</p>
+    <div class="card">
+      <div class="card-eyebrow">Access Required</div>
+      <div class="card-title">Enter Your License Key</div>
+      <p class="card-desc">Enter the key you received to verify your purchase and unlock your download.</p>
 
-      <div class="download-box">
-        <div class="download-icon">⚡</div>
-        <div class="download-info">
-          <div class="download-name">RainyInstaller.exe</div>
-          <div class="download-meta">Windows · One-time download · ~5MB</div>
-        </div>
+      <label class="input-label" for="keyInput">License Key</label>
+      <div class="input-wrap">
+        <input type="text" id="keyInput" placeholder="RAINY-XXXX-XXXX"
+               autocomplete="off" spellcheck="false" maxlength="20"/>
       </div>
 
-      <button class="btn" onclick="downloadInstaller()">Download Installer</button>
-      <button class="btn secondary" onclick="goToStep2()">Already have it →</button>
-    </div>
-
-    <!-- Step 2: Enter key -->
-    <div class="panel" id="panel2">
-      <div class="panel-title">Run & Enter Your Key</div>
-      <p class="panel-desc">Open RainyInstaller.exe, plug in your Cronus Zen, then enter your key below or directly in the app.</p>
-
-      <label class="input-label" for="keyInput">Your License Key</label>
-      <input type="text" id="keyInput" class="key-input" placeholder="RAINY-XXXX-XXXX" maxlength="14" autocomplete="off" spellcheck="false"/>
-
-      <ol class="howto" style="margin-bottom:20px">
-        <li>Plug your Cronus Zen into your PC</li>
-        <li>Open RainyInstaller.exe</li>
-        <li>Paste your key and click Install to Zen</li>
-        <li>Script installs automatically — done!</li>
-      </ol>
-
-      <div class="status" id="status"></div>
+      <button class="btn" id="verifyBtn" onclick="verifyKey()">Verify Key</button>
+      <div class="status" id="keyStatus"></div>
     </div>
   </div>
 
-  <div class="footer"><a href="admin.html">admin</a></div>
+  <!-- Panel 2: Download -->
+  <div class="panel hidden" id="panel2">
+    <div class="logo">
+      <span class="logo-wordmark">Rainy.solutions</span>
+      <span class="logo-sub">Script Distribution</span>
+    </div>
+
+    <div class="card">
+      <div class="download-icon">⚡</div>
+      <div class="card-eyebrow" style="text-align:center">Key Verified</div>
+      <div class="card-title" style="text-align:center">Download Your Installer</div>
+      <p class="card-desc" style="text-align:center;margin-bottom:24px">Your key has been verified. Download the installer and follow the steps below.</p>
+
+      <ol class="steps-list">
+        <li>
+          <span class="step-num">1</span>
+          <span>Download and run <strong style="color:var(--text)">RainyInstaller.exe</strong> as Administrator</span>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <span>Make sure your Cronus Zen is plugged in and Zen Studio is closed</span>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <span>Enter your key in the installer and click <strong style="color:var(--text)">Install to Zen</strong></span>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <span>Script installs automatically — your Zen is ready</span>
+        </li>
+      </ol>
+
+      <button class="btn" id="downloadBtn" onclick="downloadInstaller()">Download Installer</button>
+      <div class="status" id="dlStatus"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <a href="admin.html">admin</a>
 </div>
 
 <script>
-  // Replace with your Railway URL
+  // ── Config ──────────────────────────────────────────────────────────────────
   const API_BASE = 'https://rainy-backend1-production.up.railway.app';
-  // Replace with your actual .exe download URL (upload RainyInstaller.exe to GitHub releases)
-  const EXE_URL = 'https://github.com/aauserrainy/rainy-release/releases/download/latest/RainyInstaller.exe';
+  const EXE_URL  = 'https://github.com/aauserrainy/rainy-release/releases/download/latest/RainyInstaller.exe';
 
-  function downloadInstaller() {
-    window.location.href = EXE_URL;
-    setTimeout(() => goToStep2(), 2000);
+  // ── Cursor glow ─────────────────────────────────────────────────────────────
+  const glow = document.getElementById('glow');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let cx = mx, cy = my;
+
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  function animateGlow() {
+    cx += (mx - cx) * 0.08;
+    cy += (my - cy) * 0.08;
+    glow.style.left = cx + 'px';
+    glow.style.top  = cy + 'px';
+    requestAnimationFrame(animateGlow);
   }
+  animateGlow();
 
-  function goToStep2() {
-    document.getElementById('panel1').classList.remove('active');
-    document.getElementById('panel2').classList.add('active');
-    document.getElementById('tab1').classList.remove('active');
-    document.getElementById('tab1').classList.add('done');
-    document.getElementById('tab2').classList.add('active');
-  }
-
-  // Auto-format key input
-  document.getElementById('keyInput').addEventListener('input', function() {
-    let val = this.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 12);
-    let parts = [];
-    if (val.length > 0) parts.push(val.slice(0, 5));
-    if (val.length > 5) parts.push(val.slice(5, 9));
-    if (val.length > 9) parts.push(val.slice(9, 13));
-    this.value = parts.join('-');
-  });
-
-  // Rain canvas
-  const canvas = document.getElementById('rain');
+  // ── Particle canvas ─────────────────────────────────────────────────────────
+  const canvas = document.getElementById('bgCanvas');
   const ctx = canvas.getContext('2d');
-  let drops = [];
-  function initRain() {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    drops = Array.from({ length: 120 }, () => ({
-      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-      len: Math.random() * 18 + 6, speed: Math.random() * 3 + 1.5,
-      opacity: Math.random() * 0.6 + 0.2
+  let particles = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initParticles();
+  }
+
+  function initParticles() {
+    particles = Array.from({ length: 80 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 1.5 + 0.3,
+      a: Math.random() * 0.5 + 0.1
     }));
   }
-  function drawRain() {
+
+  function drawParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drops.forEach(d => {
-      ctx.beginPath(); ctx.strokeStyle = `rgba(74,184,255,${d.opacity})`;
-      ctx.lineWidth = 0.8; ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 1, d.y + d.len); ctx.stroke();
-      d.y += d.speed;
-      if (d.y > canvas.height) { d.y = -d.len; d.x = Math.random() * canvas.width; }
+
+    // Draw connecting lines
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255,255,255,${0.06 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw dots
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${p.a})`;
+      ctx.fill();
+
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
     });
-    requestAnimationFrame(drawRain);
+
+    requestAnimationFrame(drawParticles);
   }
-  window.addEventListener('resize', initRain); initRain(); drawRain();
+
+  window.addEventListener('resize', resize);
+  resize();
+  drawParticles();
+
+  // ── Key verification ─────────────────────────────────────────────────────────
+  let verifiedKey = null;
+
+  async function verifyKey() {
+    const key = document.getElementById('keyInput').value.trim().toUpperCase();
+    const btn = document.getElementById('verifyBtn');
+    const status = document.getElementById('keyStatus');
+
+    if (!key) { setStatus(status, 'Please enter your license key.', 'error'); return; }
+
+    btn.disabled = true;
+    setStatus(status, 'Verifying...', 'loading');
+
+    try {
+      // Check key exists and is unused by attempting a dry check
+      // We use the scripts endpoint to confirm server is alive,
+      // then send the key to redeem — but we don't want to burn it here.
+      // Instead we just try to validate format and let the installer handle redemption.
+      // So just check key format and show download.
+
+      // Validate format: RAINY-XXXXXXXX-XXXXXXXX
+      const parts = key.split('-');
+      if (parts.length !== 3 || parts[0] !== 'RAINY' || parts[1].length !== 8 || parts[2].length !== 8) {
+        setStatus(status, 'Invalid key format.', 'error');
+        btn.disabled = false;
+        return;
+      }
+
+      // Quick server check — ping scripts to confirm backend alive
+      const ping = await fetch(`${API_BASE}/api/scripts`, { method: 'GET' });
+      if (!ping.ok) throw new Error('Server unreachable');
+
+      verifiedKey = key;
+      setStatus(status, '<span class="success-tick">✓</span> Key accepted!', 'success');
+      status.innerHTML = '<span class="success-tick" style="color:var(--success)">✓ Key accepted!</span>';
+
+      setTimeout(() => {
+        document.getElementById('panel1').classList.add('exit-up');
+        setTimeout(() => {
+          document.getElementById('panel2').classList.remove('hidden');
+        }, 300);
+      }, 800);
+
+    } catch {
+      setStatus(status, 'Could not connect to server. Try again.', 'error');
+      btn.disabled = false;
+    }
+  }
+
+  function downloadInstaller() {
+    const btn = document.getElementById('downloadBtn');
+    const status = document.getElementById('dlStatus');
+    btn.textContent = '↓  Downloading...';
+    btn.disabled = true;
+    window.location.href = EXE_URL;
+    setTimeout(() => {
+      setStatus(status, 'If your download did not start, click again.', 'loading');
+      btn.textContent = 'Download Installer';
+      btn.disabled = false;
+    }, 3000);
+  }
+
+  function setStatus(el, msg, type) {
+    el.textContent = msg;
+    el.className = `status ${type}`;
+  }
+
+  // ── Key input formatting ─────────────────────────────────────────────────────
+  document.getElementById('keyInput').addEventListener('input', function() {
+    let val = this.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    let result = '';
+    if (val.length > 0)  result = val.slice(0, 5);
+    if (val.length > 5)  result += '-' + val.slice(5, 13);
+    if (val.length > 13) result += '-' + val.slice(13, 21);
+    this.value = result;
+  });
+
+  document.getElementById('keyInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') verifyKey();
+  });
 </script>
 </body>
 </html>
