@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Comefly.project/8x</title>
+  <title>Connected Dots</title>
   <style>
     html {
       width: 100%;
@@ -23,6 +23,7 @@
       cursor: default;
       touch-action: pan-y;
       isolation: isolate;
+      filter: saturate(1.28);
     }
 
     .page-background {
@@ -36,11 +37,11 @@
 
     body.hello-glitch { animation: hello-glitch 95ms steps(2, end) 32; }
     @keyframes hello-glitch {
-      0% { transform: translate(0, 0) skew(0deg); filter: none; }
+      0% { transform: translate(0, 0) skew(0deg); filter: saturate(1.28); }
       25% { transform: translate(-10px, 6px) skew(-1.8deg); filter: contrast(1.18) saturate(1.35); }
       50% { transform: translate(12px, -7px) skew(2deg); filter: hue-rotate(16deg) contrast(1.25); }
       75% { transform: translate(-7px, -10px) skew(-1deg); filter: contrast(1.12) saturate(1.4); }
-      100% { transform: translate(0, 0) skew(0deg); filter: none; }
+      100% { transform: translate(0, 0) skew(0deg); filter: saturate(1.28); }
     }
 
     canvas {
@@ -164,26 +165,31 @@
       padding: 0.42rem 0.66rem;
     }
     .project-badge .heart { margin-right: 0.36rem; color: #fff; font-size: 1.65em; line-height: 0.55; }
+    .ida-open { position: fixed; z-index: 20; right: 1rem; bottom: 4.4rem; cursor: pointer; }
+    .ida-modal { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; padding: 1rem; background: rgba(4, 7, 13, 0.68); backdrop-filter: blur(10px); }
+    .ida-modal[hidden] { display: none; }
+    .ida-window { width: min(820px, 96vw); overflow: hidden; color: #d7e1ef; border: 1px solid rgba(167, 192, 229, 0.5); border-radius: 0.75rem; background: #101723; box-shadow: 0 0 30px rgba(201, 218, 255, 0.35), 0 28px 90px rgba(0,0,0,0.55); font: 0.75rem / 1.45 "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    .ida-titlebar { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.8rem; border-bottom: 1px solid #2f425f; background: linear-gradient(90deg, #18263b, #111a28); font: 700 0.68rem / 1 Inter, Arial, sans-serif; letter-spacing: 0.1em; }
+    .ida-close { width: 1.55rem; height: 1.55rem; padding: 0; color: #d7e1ef; border: 1px solid rgba(215,225,239,0.45); border-radius: 0.3rem; background: transparent; cursor: pointer; }
+    .ida-toolbar { padding: 0.42rem 0.8rem; color: #91a9c8; border-bottom: 1px solid #283a55; background: #0d141f; font-size: 0.62rem; }
+    .ida-body { display: grid; grid-template-columns: 12.8rem 1fr; min-height: 390px; }
+    .ida-sidebar { padding: 0.65rem; border-right: 1px solid #283a55; background: #0d141f; }
+    .ida-label { margin-bottom: 0.5rem; color: #7f9bc2; font-size: 0.62rem; letter-spacing: 0.1em; }
+    .ida-file { display: block; width: 100%; margin-bottom: 0.32rem; padding: 0.55rem; color: #c5d4e7; border: 1px solid transparent; border-radius: 0.3rem; background: transparent; cursor: pointer; font: inherit; text-align: left; }
+    .ida-file:hover, .ida-file.is-active { border-color: #4b75a9; background: #172841; }
+    .ida-main { min-width: 0; padding: 0.8rem; }
+    .ida-file-name { color: #fff; font-size: 0.82rem; font-weight: 700; }
+    .ida-note { margin: 0.3rem 0 0.7rem; color: #8ca3be; font-size: 0.65rem; }
+    .ida-disasm { height: 190px; margin: 0; padding: 0.7rem; overflow: auto; color: #cbd9eb; border: 1px solid #2b405f; border-radius: 0.35rem; background: #0a1018; white-space: pre; }
+    .ida-disasm .address { color: #7193be; }
+    .ida-crack { display: flex; gap: 0.45rem; margin-top: 0.75rem; }
+    .ida-input { flex: 1; min-width: 0; padding: 0.55rem; color: #fff; border: 1px solid #3d5b82; border-radius: 0.35rem; outline: none; background: #0a1018; font: inherit; }
+    .ida-input:focus { border-color: #a9c8f3; box-shadow: 0 0 0 2px rgba(169,200,243,0.15); }
+    .ida-run { padding: 0.55rem 0.7rem; color: #e7f1ff; border: 1px solid #7898bf; border-radius: 0.35rem; background: #203a5b; cursor: pointer; font: 700 0.65rem / 1 Inter, Arial, sans-serif; letter-spacing: 0.06em; }
+    .ida-status { min-height: 1.2em; margin: 0.5rem 0 0; color: #8da5c3; font-size: 0.66rem; }
+    .ida-status.is-success { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.85); }
+    @media (max-width: 620px) { .ida-body { grid-template-columns: 1fr; } .ida-sidebar { display: flex; gap: 0.3rem; overflow-x: auto; border-right: 0; border-bottom: 1px solid #283a55; } .ida-label { display: none; } .ida-file { min-width: max-content; margin: 0; } }
     .profile-bio { margin: 0.5rem 0 0; color: #fff; font: 500 0.76rem / 1.3 Inter, Arial, sans-serif; text-shadow: 0 0 8px rgba(255,255,255,0.78); }
-    .privacy-pill {
-      position: absolute;
-      top: 0.78rem;
-      right: 0.78rem;
-      width: min(10.3rem, 35%);
-      padding: 0.42rem 0.52rem;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.56);
-      border-radius: 0.62rem;
-      background: rgba(16, 27, 48, 0.28);
-      box-shadow: 0 0 9px rgba(255,255,255,0.2);
-      font: 700 0.57rem / 1.3 Inter, Arial, sans-serif;
-      text-align: left;
-      text-shadow: 0 0 5px rgba(255,255,255,0.75);
-    }
-    .privacy-title { display: flex; align-items: center; gap: 0.3rem; letter-spacing: 0.06em; }
-    .privacy-dot { width: 0.38rem; height: 0.38rem; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff; }
-    .privacy-details { display: none; margin-top: 0.35rem; color: rgba(255,255,255,0.88); font-weight: 500; letter-spacing: 0; overflow-wrap: anywhere; }
-    .privacy-pill.is-ready .privacy-details { display: block; }
     .role-badges, .tech-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.38rem; }
     .role-badges { margin-top: 0.9rem; }
     .tech-badges { margin-top: 0.5rem; }
@@ -356,8 +362,6 @@
     }
 
     .view-gate.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .view-gate-content { display: grid; gap: 0.65rem; place-items: center; }
-    .view-notice { max-width: 21rem; margin: 0; color: rgba(255,255,255,0.86); font: 500 0.66rem / 1.35 Inter, Arial, sans-serif; text-align: center; text-shadow: 0 0 8px rgba(255,255,255,0.8); }
     .view-button {
       padding: 1rem 1.5rem;
       color: #fff;
@@ -453,10 +457,9 @@
   <div class="side-video left interactive-media"><video autoplay muted loop playsinline src="assets/left-video.mov"></video></div>
   <div class="side-video right interactive-media"><video autoplay muted loop playsinline src="assets/right-video.mov"></video></div>
   <div class="surprise-actions"><button class="surprise-button" id="surprise-button" type="button">SURPRISE ME</button><button class="surprise-button question" id="about-button" type="button" aria-label="Search Linus Torvalds">?</button></div>
-  <div class="view-gate" id="view-gate"><div class="view-gate-content"><button class="view-button" id="view-button" type="button">CLICK TO VIEW</button><p class="view-notice">Welcome to the club</p></div></div>
+  <div class="view-gate" id="view-gate"><button class="view-button" id="view-button" type="button">CLICK TO VIEW</button></div>
   <main class="profile-card" aria-label="8x profile">
     <span class="profile-uid">UID 1</span>
-    <aside class="privacy-pill" id="privacy-pill" aria-live="polite"><div class="privacy-title"><span class="privacy-dot" aria-hidden="true"></span>USE A VPN!</div><div class="privacy-details" id="privacy-details">Loading connection details…</div></aside>
     <div class="live-lyrics" id="live-lyrics" aria-live="polite"></div>
     <img class="profile-avatar" src="assets/profile-portrait.jpeg" alt="Profile portrait">
     <h1 class="profile-name"><span class="name-content"><span id="typed-name">8</span><span class="typing-cursor" aria-hidden="true"></span><span class="star star-one" aria-hidden="true">✦</span><span class="star star-two" aria-hidden="true">✦</span><span class="star star-three" aria-hidden="true">✦</span><span class="star star-four" aria-hidden="true">✦</span><span class="star star-five" aria-hidden="true">✦</span><span class="star star-six" aria-hidden="true">✦</span><span class="star star-seven" aria-hidden="true">✦</span><span class="star star-eight" aria-hidden="true">✦</span></span></h1>
@@ -491,7 +494,18 @@
     <audio id="audio" src="assets/finally-18.mp3" autoplay preload="auto"></audio>
   </section>
   <div class="site-meta"><div class="status-indicator"><span class="status-dot" aria-hidden="true"></span>DEVING</div><div class="visitor-counter">VISITS <span id="visitor-count">001</span></div></div>
+  <button class="role-badge ida-open" id="ida-open" type="button">OPEN IDA PRO</button>
   <div class="role-badge project-badge" aria-label="comefly.project"><span class="heart" aria-hidden="true">♥</span>comefly.project</div>
+  <section class="ida-modal" id="ida-modal" role="dialog" aria-modal="true" aria-label=" IDA Pro " hidden>
+    <div class="ida-window">
+      <div class="ida-titlebar"><span>IDA PRO 8.4 — IDA cracked by club 333</span><button class="ida-close" id="ida-close" type="button" aria-label="Close  IDA Pro">×</button></div>
+      <div class="ida-toolbar">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Jump&nbsp;&nbsp; Search&nbsp;&nbsp; View&nbsp;&nbsp; Debug&nbsp;&nbsp; Options&nbsp;&nbsp; Help</div>
+      <div class="ida-body">
+        <aside class="ida-sidebar"><div class="ida-label">PSEUDO BINARIES</div><button class="ida-file is-active" data-challenge="skeet" type="button">Skeet-cc.exe</button><button class="ida-file" data-challenge="fatality" type="button">Fatality.win.exe</button><button class="ida-file" data-challenge="neverlose" type="button">Neverlose.exe</button></aside>
+        <div class="ida-main"><div class="ida-file-name" id="ida-file-name">Skeet-cc.exe</div><p class="ida-note" id="ida-note">  — trace the pseudo-code and enter the recovery token.</p><pre class="ida-disasm" id="ida-disasm"></pre><div class="ida-crack"><input class="ida-input" id="ida-input" type="text" autocomplete="off" spellcheck="false" placeholder="Enter recovery token"><button class="ida-run" id="ida-run" type="button">VALIDATE</button></div><p class="ida-status" id="ida-status">Hint: Follow the byte comments, decode the token, and keep the hyphen.</p></div>
+      </div>
+    </div>
+  </section>
 
   <script>
     "use strict";
@@ -511,8 +525,15 @@
     const viewButton = document.getElementById("view-button");
     const surpriseButton = document.getElementById("surprise-button");
     const aboutButton = document.getElementById("about-button");
-    const privacyPill = document.getElementById("privacy-pill");
-    const privacyDetails = document.getElementById("privacy-details");
+    const idaOpen = document.getElementById("ida-open");
+    const idaModal = document.getElementById("ida-modal");
+    const idaClose = document.getElementById("ida-close");
+    const idaFileName = document.getElementById("ida-file-name");
+    const idaNote = document.getElementById("ida-note");
+    const idaDisasm = document.getElementById("ida-disasm");
+    const idaInput = document.getElementById("ida-input");
+    const idaRun = document.getElementById("ida-run");
+    const idaStatus = document.getElementById("ida-status");
     const terminal = document.querySelector(".mini-terminal");
     const terminalForm = document.getElementById("terminal-form");
     const terminalInput = document.getElementById("terminal-input");
@@ -532,49 +553,60 @@
     let pointerX = 0;
     let pointerY = 0;
     let lastMoveTime = 0;
-
-    function getBrowserName() {
-      const agent = navigator.userAgent;
-      if (/Edg\//.test(agent)) return "Microsoft Edge";
-      if (/Firefox\//.test(agent)) return "Firefox";
-      if (/Chrome\//.test(agent)) return "Chrome";
-      if (/Safari\//.test(agent)) return "Safari";
-      return "Unknown browser";
-    }
-
-    function getOperatingSystem() {
-      const agent = navigator.userAgent;
-      if (/Windows/.test(agent)) return "Windows";
-      if (/Android/.test(agent)) return "Android";
-      if (/iPhone|iPad|iPod/.test(agent)) return "iOS";
-      if (/Mac OS X/.test(agent)) return "macOS";
-      if (/Linux/.test(agent)) return "Linux";
-      return "Unknown OS";
-    }
-
-    async function showConnectionDetails() {
-      privacyPill.classList.add("is-ready");
-      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      const details = [
-        "IP: loading…",
-        "Browser: " + getBrowserName(),
-        "OS: " + getOperatingSystem(),
-        "Language: " + (navigator.language || "unknown"),
-        "Timezone: " + (Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown"),
-        "Screen: " + screen.width + "×" + screen.height,
-        "Network: " + (connection?.effectiveType || "unknown")
-      ];
-      privacyDetails.textContent = details.join("\n");
-      try {
-        const response = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
-        if (!response.ok) throw new Error("IP lookup failed");
-        const { ip } = await response.json();
-        details[0] = "IP: " + (ip || "unavailable");
-      } catch {
-        details[0] = "IP: unavailable";
+    let currentIdaChallenge = "skeet";
+    const idaChallenges = {
+      skeet: {
+        name: "Skeet-cc.exe",
+        token: "VANTA-42",
+        hint: "Hint: XOR each hex byte with 0x55, then read the ASCII token.",
+        disasm: "; pseudo x64 listing — \n.text:00401000  push rbp\n.text:00401001  mov  rbp, rsp\n.text:00401008  mov  ecx, 55h\n.text:0040100D  lea  rdx, aCipherBytes\n.text:00401014  call decode_xor_stream\n.text:00401019  cmp  eax, 0\n.text:0040101C  jne  short access_denied\n\n.rdata:00408020  aCipherBytes db 03h, 14h, 1Bh, 01h, 14h, 78h, 61h, 67h\n; key: 0x55  |  output format: WORD-NN"
+      },
+      fatality: {
+        name: "Fatality.win.exe",
+        token: "CIPHER-17",
+        hint: "Hint: Rotate each byte right by one bit, then apply the shown offset.",
+        disasm: "; pseudo x64 listing — \n.text:00422040  movzx eax, byte ptr [rsi]\n.text:00422044  ror   al, 1\n.text:00422046  sub   al, 3\n.text:00422048  stosb\n.text:00422049  loop  short decode_loop\n\n.rdata:0042A120  db 8Dh, 94h, 9Dh, 98h, 94h, 5Ch, 43h, 3Dh, 43h\n; transform: ROR 1, subtract 3 | keep the hyphen"
+      },
+      neverlose: {
+        name: "Neverlose.exe",
+        token: "NOVA-808",
+        hint: "Hint: Reverse the 7-byte blocks, then read the decoded marker.",
+        disasm: "; pseudo x64 listing — \n.text:006010A0  mov   r8d, 7\n.text:006010A6  call  reverse_block\n.text:006010AB  add   rsi, 7\n.text:006010AF  cmp   rsi, rdi\n.text:006010B2  jb    short next_block\n\n.rdata:00608040  db '808-AVON'\n; block width: 7 | marker is reversed | token format: WORD-NNN"
       }
-      privacyDetails.textContent = details.join("\n");
+    };
+
+    function renderIdaChallenge(key) {
+      const challenge = idaChallenges[key];
+      currentIdaChallenge = key;
+      idaFileName.textContent = challenge.name;
+      idaNote.textContent = "Ida — " + challenge.hint;
+      idaDisasm.textContent = challenge.disasm;
+      idaInput.value = "";
+      idaStatus.textContent = challenge.hint;
+      idaStatus.classList.remove("is-success");
+      document.querySelectorAll(".ida-file").forEach((file) => file.classList.toggle("is-active", file.dataset.challenge === key));
     }
+
+    idaOpen.addEventListener("click", () => {
+      idaModal.hidden = false;
+      renderIdaChallenge(currentIdaChallenge);
+      idaInput.focus();
+    });
+    idaClose.addEventListener("click", () => { idaModal.hidden = true; });
+    idaModal.addEventListener("click", (event) => { if (event.target === idaModal) idaModal.hidden = true; });
+    document.querySelectorAll(".ida-file").forEach((file) => file.addEventListener("click", () => renderIdaChallenge(file.dataset.challenge)));
+    function validateIdaToken() {
+      const challenge = idaChallenges[currentIdaChallenge];
+      if (idaInput.value.trim().toUpperCase() === challenge.token) {
+        idaStatus.textContent = "GOOD JOB —  challenge solved: " + challenge.name;
+        idaStatus.classList.add("is-success");
+      } else {
+        idaStatus.textContent = "Validation failed. Recheck the pseudo-code trace.";
+        idaStatus.classList.remove("is-success");
+      }
+    }
+    idaRun.addEventListener("click", validateIdaToken);
+    idaInput.addEventListener("keydown", (event) => { if (event.key === "Enter") validateIdaToken(); });
 
     function terminalLine(text, className = "") {
       const line = document.createElement("div");
@@ -895,7 +927,6 @@
     progress.addEventListener("input", () => { if (audio.duration) audio.currentTime = (Number(progress.value) / 100) * audio.duration; });
     viewButton.addEventListener("click", async () => {
       viewGate.classList.add("is-hidden");
-      showConnectionDetails();
       try { await audio.play(); } catch {}
     }, { once: true });
     surpriseButton.addEventListener("click", () => {
