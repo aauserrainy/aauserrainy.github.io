@@ -215,6 +215,23 @@
       text-shadow: 0 1px 2px rgba(18, 31, 57, 0.72), 0 0 5px rgba(255,255,255,0.82);
     }
 
+    .hvh-button {
+      margin-top: 0.9rem;
+      padding: 0.5rem 0.95rem;
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 0.55rem;
+      background: rgba(41, 65, 106, 0.36);
+      box-shadow: 0 0 12px rgba(255,255,255,0.55), 0 0 24px rgba(188,169,255,0.34);
+      cursor: pointer;
+      font: 700 0.7rem / 1 Inter, Arial, sans-serif;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 7px rgba(255,255,255,0.9);
+      transition: transform 140ms ease, background 140ms ease;
+    }
+    .hvh-button:hover, .hvh-button:focus-visible { transform: translateY(-2px) scale(1.05); background: rgba(61, 92, 143, 0.56); outline: none; }
+
     .profile-link {
       display: grid;
       width: 1.75rem;
@@ -471,6 +488,7 @@
       <span class="role-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11h-6V5h-2v6H6v2h6v6h2v-6h6v-2z"/><path d="M4 3h8v2H6v12h12v-6h2v8H4V3z"/></svg>Inviter</span>
     </div>
     <div class="tech-badges" aria-label="Technology badges"><span class="tech-badge">C++</span><span class="tech-badge">Assembly</span><span class="tech-badge">C#</span></div>
+    <a class="hvh-button" href="https://comefly.xyz/hvh/" aria-label="HvH game">HvH game</a>
     <nav class="profile-links" aria-label="Profile links">
       <a class="profile-link" href="https://github.com/aauserrainy" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.22c0 4.51 2.87 8.34 6.84 9.69.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.2-3.37-1.2-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.67.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0112 6.91c.85 0 1.7.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.93.68 1.88 0 1.36-.01 2.46-.01 2.8 0 .27.18.59.69.49A10.23 10.23 0 0022 12.22C22 6.58 17.52 2 12 2z"/></svg>
@@ -637,7 +655,12 @@
       if (lowerVerb === "help") {
         terminalLine("Linux: ls, pwd, cd, cat, echo, whoami, uname, date, uptime, clear");
         terminalLine("Windows: dir, type, ver, systeminfo, ipconfig, cls");
-        terminalLine("Extras: hello, neofetch, hostname, history");
+        terminalLine("Extras: hello, neofetch, hostname, history, hvh");
+        return;
+      }
+      if (lowerVerb === "hvh") {
+        terminalLine("launching HvH game -> comefly.xyz/hvh ...");
+        window.setTimeout(() => { window.location.href = "https://comefly.xyz/hvh/"; }, 500);
         return;
       }
       if (lowerVerb === "hello") {
